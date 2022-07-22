@@ -10,10 +10,10 @@ from . import models
 
 @api.get(
     path='/search/{query:path}',
-    name="search",
-    response_model=models.SearchResponse
+    response_model=models.SearchResponse,
+    name="Search for Videos"
 )
-def getSearch(
+def search(
         query: str = Path(),
         limit: int = Query(15, gt=0, le=50)
 ):
