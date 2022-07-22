@@ -9,6 +9,7 @@ import pydantic
 from fastapi import Path
 from pytube import YouTube
 from main import api
+from . import utility
 
 
 class MetadataResponse(pydantic.BaseModel):
@@ -34,7 +35,8 @@ class MetadataResponse(pydantic.BaseModel):
 def getDownload(
         youtubeId: str = Path()
 ):
-    video = YouTube(f'https://youtu.be/{youtubeId}')
+    url = utility.completeYoutubeUrl(known=youtubeId)
+    video = YouTube(url)
     return dict(
         video_id=video.video_id,
         title=video.title,
