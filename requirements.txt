@@ -1,0 +1,15 @@
+fastapi
+
+# generell
+requests
+
+# yt download
+pytube
+moviepy
+eyeD3
+
+# download.lyricfinder
+beautifulsoup4
+
+# yt search
+youtube-search-python
