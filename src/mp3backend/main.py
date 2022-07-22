@@ -7,10 +7,6 @@ import os
 import importlib
 
 import fastapi
-import requests
-import pytube
-import moviepy
-import bs4
 
 import scripts
 
