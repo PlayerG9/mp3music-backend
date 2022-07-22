@@ -1,1 +1,1 @@
-web: uvicorn src.mp3backend.__main__:api --host=0.0.0.0 --port=${PORT:-5000}
+web: src/run.sh
