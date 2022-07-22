@@ -12,3 +12,10 @@ import youtubesearchpython
 
 
 api = fastapi.FastAPI()
+
+
+@api.get('/')
+def root():
+    return {
+        "message": "Hello World"
+    }
