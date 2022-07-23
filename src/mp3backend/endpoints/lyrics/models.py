@@ -3,12 +3,13 @@
 r"""
 
 """
+from typing import Optional
 from pydantic import BaseModel
 
 
 class RequestConfig(BaseModel):
     title: str
-    author: str
+    author: Optional[str]
 
 
 class LyricsResponse(BaseModel):

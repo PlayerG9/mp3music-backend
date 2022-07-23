@@ -3,6 +3,8 @@
 r"""
 
 """
+import fastapi
+from fastapi import status
 from main import api
 from . import models
 from . import crud
@@ -13,7 +15,15 @@ from . import crud
     response_model=models.LyricsResponse,
     name="Fetch Lyrics"
 )
-def lyrics(config: models.RequestConfig):
+def findLyrics(
+        title: str = fastapi.Body(),
+        author: str = fastapi.Body(None),
+):
+    try:
+        lyrics = crud.findLyrics(title=title, creator=author)
+    except crud.LyricsNotFound as error:
+        print(error)
+        raise fastapi.exceptions.HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
     return dict(
-        lyrics=crud.findLyrics(title=config.title, creator=config.author)
+        lyrics=lyrics
     )
