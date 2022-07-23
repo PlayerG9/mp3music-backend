@@ -48,8 +48,7 @@ def _searchForLyricsUrl(title: str, creator: str) -> str:
 
     x_value = _findValueX()
 
-    provider = "https://search.azlyrics.com"
-    site = f"{provider}/search.php"
+    site = "https://search.azlyrics.com/"
 
     if creator:
         query = f"{creator} {title}"
@@ -68,12 +67,8 @@ def _searchForLyricsUrl(title: str, creator: str) -> str:
     if table is None:
         raise LyricsNotFound("lyrics weren't found")
 
-    print(url)
     lyrics_url = table.find(_findFirstUrl).get('href')
-    print(lyrics_url)
-    if lyrics_url.startswith("?"):
-        lyrics_url = f"{site}{lyrics_url}"
-    print(lyrics_url)
+
     if not lyrics_url or "azlyrics" not in lyrics_url:
         raise LyricsNotFound("something went wrong in the search")
 
