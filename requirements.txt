@@ -3,6 +3,7 @@ fastapi
 pydantic
 
 # generell
+aiohttp
 requests
 
 # yt download
