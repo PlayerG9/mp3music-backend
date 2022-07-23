@@ -7,6 +7,10 @@ from typing import Optional
 from pydantic import BaseModel
 
 
+class FileDownloadConfig(BaseModel):
+    filename: str
+
+
 class MetadataConfig(BaseModel):
     title: Optional[str]
     artist: Optional[str]

@@ -28,9 +28,14 @@ DELETE_DELAY = 15*60  # 15 min
 
 @api.get(
     '/mp3file/{uid}',
+    response_class=FileResponse,
     name="Download the actual mp3 file"
 )
-def getMp3File(uid: str = Path(), filename: str = Body("audio")):
+def getMp3File(
+        uid: str,
+        config: models.FileDownloadConfig
+):
+    filename = config.filename
     if not filename.endswith('mp3'):
         filename = f"{filename}.mp3"
 
