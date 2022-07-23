@@ -18,10 +18,10 @@ def search(
         limit: int = Query(15, gt=0, le=50)
 ):
     from youtubesearchpython import CustomSearch, SearchMode, VideoDurationFilter, VideoSortOrder
-    search = CustomSearch(
+    web_search = CustomSearch(
         query=query,
         searchPreferences=SearchMode.videos + VideoDurationFilter.short + VideoSortOrder.relevance,
         limit=limit,
         timeout=30
     )
-    return search.result()
+    return web_search.result()
