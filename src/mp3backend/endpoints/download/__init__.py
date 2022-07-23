@@ -3,15 +3,15 @@
 r"""
 
 """
-import asyncio
 import os
+import asyncio
 
 import fastapi
-from fastapi import Path, Body
 from fastapi.responses import FileResponse
-import requests
 import pytube
 import moviepy.editor as moviepy
+import aiohttp
+import requests
 import eyed3.mp3
 from eyed3.id3.frames import ImageFrame
 
@@ -22,7 +22,8 @@ from . import models
 from . import utility
 
 
-CHUNK_SIZE = 2*1024*1024
+WEBSOCKET_CONNECTED = 1  # fastapi.websockets.WebsocketState.CONNECTED
+CHUNK_SIZE = 1024*1024
 DELETE_DELAY = 15*60  # 15 min
 
 
@@ -58,13 +59,22 @@ class SharedState:
     '/download/{youtubeId}',
     name="create the mp3 file (websocket for status)"
 )
-async def getDownload(
-        config: models.DownloadConfig,
-        websocket: fastapi.WebSocket,
+async def download(
         youtubeId: str,
+        websocket: fastapi.WebSocket,
         backgroundTasks: fastapi.BackgroundTasks
 ):
     await websocket.accept()
+
+    data = await websocket.receive_json()
+    try:
+        config = models.DownloadConfig.parse_obj(data)
+    except Exception as error:
+        await websocket.send_json(dict(
+            error=str(error),
+            error_class=error.__class__.__name__
+        ))
+        return
 
     state = SharedState()
     state.mp4FilePath = utility.getNewTempFile('mp4')
@@ -109,7 +119,8 @@ async def getDownload(
             error=str(error),
             error_class=error.__class__.__name__
         ))
-        raise error
+        import traceback
+        traceback.print_exception(type(error), error, error.__traceback__)
 
 
 async def delayedFileDelete(filepath: str):
@@ -123,16 +134,25 @@ def getFinalFilename(metadata: models.MetadataConfig) -> str:
     return f"{author}_{title}"
 
 
-def download_thumbnail(state) -> (bytes, str):
+def getMimetypeFromUrl(url: str) -> str:
     import mimetypes
+    if '?' in url:
+        url = url.split('?')[0]
+    return mimetypes.guess_type(url)[0]
 
+
+async def download_thumbnail(state) -> (bytes, str):
     url = state.youtube.thumbnail_url
-    mimetype: str = mimetypes.guess_type(url)[0]
 
-    response = requests.get(url)
-    response.raise_for_status()
+    mimetype = getMimetypeFromUrl(url)
 
-    return response.content, mimetype
+    async with aiohttp.ClientSession() as session:
+        timeout = aiohttp.ClientTimeout(total=60, connect=20)
+        async with session.get(url, timeout=timeout) as response:
+            response.raise_for_status()
+            data = await response.read()
+
+    return data, mimetype
 
 
 async def downloadMp4Video(state: SharedState):
@@ -140,19 +160,27 @@ async def downloadMp4Video(state: SharedState):
     await state.websocket.send_json(dict(message="searching for download"))
     audio_stream = youtube.streams.get_audio_only()
 
-    download_stream = requests.get(audio_stream.url, timeout=(10, 30), stream=True)
-    download_stream.raise_for_status()
+    await state.websocket.send_json(dict(message="start download"))
+    async with aiohttp.ClientSession() as session:
+        timeout = aiohttp.ClientTimeout(total=300, connect=20)
+        async with session.get(audio_stream.url, timeout=timeout) as response:
+            response.raise_for_status()
 
-    downloaded = 0
-    max_size = audio_stream.filesize
+            downloaded = 0
+            max_size = audio_stream.filesize
 
-    with open(state.mp4FilePath, 'wb') as file:
-        for chunk in download_stream.iter_content(CHUNK_SIZE):
-            downloaded += len(chunk)
-            file.write(chunk)
-            await state.websocket.send_json(dict(
-                message=f"progress: {int((downloaded / max_size) * 100)}%"
-            ))
+            with open(state.mp4FilePath, 'wb') as file:
+                while not response.content.is_eof():
+                    chunk = await response.content.read(CHUNK_SIZE)
+                    downloaded += len(chunk)
+                    file.write(chunk)
+                    await state.websocket.send_json(dict(
+                        message=f"progress: {int((downloaded / max_size) * 100)}%",
+                        extra=dict(
+                            has=downloaded,
+                            max=max_size
+                        )
+                    ))
 
 
 async def convertToMp3Audio(state: SharedState):
@@ -177,8 +205,10 @@ async def manipulateMp3Metadata(state: SharedState):
         info="Fetching Thumbnail..."
     ))
     try:
-        blob, mimetype = download_thumbnail(state)
-    except (requests.Timeout, requests.HTTPError) as error:
+        blob, mimetype = await download_thumbnail(state)
+        if not mimetype:
+            raise TypeError("failed to get mimetype")
+    except (requests.Timeout, requests.HTTPError, TypeError) as error:
         await state.websocket.send_json(dict(
             warning=f"failed to fetch thumbnail ({error.__class__.__name__}: {error})"
         ))
@@ -195,7 +225,7 @@ async def manipulateMp3Metadata(state: SharedState):
     ))
     try:
         lyrics: str = findLyrics(metadata.title, metadata.artist)
-    except (requests.Timeout, requests.HTTPError, LyricsNotFound) as error:
+    except (aiohttp.ServerTimeoutError, aiohttp.ClientError, LyricsNotFound) as error:
         await state.websocket.send_json(dict(
             warning=f"failed to fetch lyrics ({error.__class__.__name__}: {error})"
         ))
