@@ -4,6 +4,7 @@ r"""
 
 """
 import os
+from datetime import datetime
 
 
 def getPath(*paths):
@@ -15,4 +16,7 @@ def getPath(*paths):
 
 def getApiDescription() -> str:
     with open(getPath('README.md')) as readme:
-        return readme.read()
+        markdown = readme.read()
+    return markdown.format(
+        build_time=datetime.now().isoformat(sep=" ")
+    )
