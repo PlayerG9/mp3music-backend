@@ -3,12 +3,13 @@
 r"""
 
 """
+from typing import Optional
 from pydantic import BaseModel
 
 
 class MetadataConfig(BaseModel):
-    title: str
-    author: str
+    title: Optional[str]
+    artist: Optional[str]
 
 
 class DownloadConfig(BaseModel):

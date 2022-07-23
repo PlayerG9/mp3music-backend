@@ -11,6 +11,8 @@ from fastapi.responses import FileResponse
 import requests
 import pytube
 import moviepy.editor as moviepy
+import eyed3.mp3
+from eyed3.id3.frames import ImageFrame
 from main import api
 from ..lyrics.crud import findLyrics, LyricsNotFound
 from ..metadata.utility import completeYoutubeUrl
@@ -91,9 +93,21 @@ async def getDownload(
 
 
 def getFinalFilename(metadata: models.MetadataConfig) -> str:
-    author = utility.fix4filename(metadata.author)
+    author = utility.fix4filename(metadata.artist)
     title = utility.fix4filename(metadata.title)
     return f"{author}_{title}"
+
+
+def download_thumbnail(state) -> (bytes, str):
+    import mimetypes
+
+    url = state.youtube.thumbnail_url
+    mimetype: str = mimetypes.guess_type(url)[0]
+
+    response = requests.get(url)
+    response.raise_for_status()
+
+    return response.content, mimetype
 
 
 async def downloadMp4Video(state: SharedState):
@@ -121,7 +135,49 @@ async def convertToMp3Audio(state: SharedState):
 
 async def manipulateMp3Metadata(state: SharedState):
     metadata: models.MetadataConfig = state.config.metadata
+
+    audiofile: eyed3.core.AudioFile = eyed3.load(state.mp3FilePath)
+    if audiofile.tag is None:
+        audiofile.initTag()
+    tag: eyed3.mp3.id3.Tag = audiofile.tag
+
+    if metadata.title:
+        tag.title = metadata.title
+    if metadata.artist:
+        tag.artist = metadata.artist
+
+    await state.websocket.send_json(dict(
+        info="Fetching Thumbnail..."
+    ))
     try:
-        lyrics = findLyrics(metadata.title, metadata.author)
-    except LyricsNotFound as error:
-        await state.websocket.send_json(dict(warning=f"failed to fetch lyrics: {error}"))
+        blob, mimetype = download_thumbnail(state)
+    except (requests.Timeout, requests.HTTPError) as error:
+        await state.websocket.send_json(dict(
+            warning=f"failed to fetch lyrics: {error}"
+        ))
+    else:
+        # for keyId in [ImageFrame.ICON, ImageFrame.FRONT_COVER]:
+        tag.images.set(
+            ImageFrame.FRONT_COVER,
+            blob,
+            mimetype
+        )
+
+    await state.websocket.send_json(dict(
+        info="Searching for lyrics..."
+    ))
+    try:
+        lyrics: str = findLyrics(metadata.title, metadata.artist)
+    except (requests.Timeout, requests.HTTPError, LyricsNotFound) as error:
+        await state.websocket.send_json(dict(
+            warning=f"failed to fetch lyrics: {error}"
+        ))
+    else:
+        tag.lyrics.set(lyrics)
+
+    try:
+        tag.save()
+    except eyed3.Error:
+        await state.websocket.send_json(dict(
+            warning=f"failed to update mp3-metadata"
+        ))
