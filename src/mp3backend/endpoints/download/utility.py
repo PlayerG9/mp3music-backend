@@ -9,9 +9,17 @@ import uuid
 import re
 
 
+TEMPDIR = os.path.join(
+    tempfile.gettempdir(),
+    "mp3music"
+)
+
+
 def getTempFilePath(*paths):
+    if not os.path.isdir(TEMPDIR):
+        os.makedirs(TEMPDIR, exist_ok=True)
     return os.path.join(
-        tempfile.gettempdir(),
+        TEMPDIR,
         *paths
     )
 
