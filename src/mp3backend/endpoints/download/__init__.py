@@ -3,7 +3,8 @@
 r"""
 
 """
-import os.path
+import asyncio
+import os
 
 import fastapi
 from fastapi import Path, Body
@@ -13,6 +14,7 @@ import pytube
 import moviepy.editor as moviepy
 import eyed3.mp3
 from eyed3.id3.frames import ImageFrame
+
 from main import api
 from ..lyrics.crud import findLyrics, LyricsNotFound
 from ..metadata.utility import completeYoutubeUrl
@@ -21,6 +23,7 @@ from . import utility
 
 
 CHUNK_SIZE = 2*1024*1024
+DELETE_DELAY = 15*60  # 15 min
 
 
 @api.get(
@@ -28,9 +31,12 @@ CHUNK_SIZE = 2*1024*1024
     name="Download the actual mp3 file"
 )
 def getMp3File(uid: str = Path(), filename: str = Body("audio")):
+    if not filename.endswith('mp3'):
+        filename = f"{filename}.mp3"
+
     return FileResponse(
         path=utility.getTempFilePath(f"{uid}.mp3"),
-        filename=f"{filename}.mp3"
+        filename=filename
     )
 
 
@@ -50,7 +56,8 @@ class SharedState:
 async def getDownload(
         config: models.DownloadConfig,
         websocket: fastapi.WebSocket,
-        youtubeId: str = Path()
+        youtubeId: str,
+        backgroundTasks: fastapi.BackgroundTasks
 ):
     await websocket.accept()
 
@@ -73,6 +80,7 @@ async def getDownload(
         await websocket.send_json(dict(
             info="manipulating mp3 metadata"
         ))
+        os.remove(state.mp4FilePath)
         await manipulateMp3Metadata(state=state)
         await websocket.send_json(dict(
             info="mp3 file is ready to download"
@@ -83,13 +91,25 @@ async def getDownload(
                 "filename": getFinalFilename(config.metadata)
             }
         ))
+        backgroundTasks.add_task(
+            delayedFileDelete,
+            filepath=state.mp3FilePath
+        )
     except Exception as error:
         if os.path.isfile(state.mp4FilePath):
             os.remove(state.mp4FilePath)
         if os.path.isfile(state.mp3FilePath):
             os.remove(state.mp3FilePath)
-        await websocket.send_json(dict(error=str(error), error_class=error.__class__.__name__))
+        await websocket.send_json(dict(
+            error=str(error),
+            error_class=error.__class__.__name__
+        ))
         raise error
+
+
+async def delayedFileDelete(filepath: str):
+    await asyncio.sleep(DELETE_DELAY)
+    os.remove(filepath)
 
 
 def getFinalFilename(metadata: models.MetadataConfig) -> str:
@@ -125,7 +145,9 @@ async def downloadMp4Video(state: SharedState):
         for chunk in download_stream.iter_content(CHUNK_SIZE):
             downloaded += len(chunk)
             file.write(chunk)
-            await state.websocket.send_json(dict(message=f"progress: {int(downloaded / max_size * 100)}%"))
+            await state.websocket.send_json(dict(
+                message=f"progress: {int((downloaded / max_size) * 100)}%"
+            ))
 
 
 async def convertToMp3Audio(state: SharedState):
@@ -153,7 +175,7 @@ async def manipulateMp3Metadata(state: SharedState):
         blob, mimetype = download_thumbnail(state)
     except (requests.Timeout, requests.HTTPError) as error:
         await state.websocket.send_json(dict(
-            warning=f"failed to fetch lyrics: {error}"
+            warning=f"failed to fetch thumbnail ({error.__class__.__name__}: {error})"
         ))
     else:
         # for keyId in [ImageFrame.ICON, ImageFrame.FRONT_COVER]:
@@ -170,7 +192,7 @@ async def manipulateMp3Metadata(state: SharedState):
         lyrics: str = findLyrics(metadata.title, metadata.artist)
     except (requests.Timeout, requests.HTTPError, LyricsNotFound) as error:
         await state.websocket.send_json(dict(
-            warning=f"failed to fetch lyrics: {error}"
+            warning=f"failed to fetch lyrics ({error.__class__.__name__}: {error})"
         ))
     else:
         tag.lyrics.set(lyrics)
