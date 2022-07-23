@@ -28,6 +28,11 @@ app = fastapi.FastAPI(
 )
 
 
+@app.get('/', include_in_schema=False)
+def index():
+    return fastapi.responses.RedirectResponse('/redoc')
+
+
 api = fastapi.APIRouter(prefix="/api")
 
 
