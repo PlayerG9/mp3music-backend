@@ -16,12 +16,15 @@ def getTempFilePath(*paths):
     )
 
 
-def getNewTempFile(ext: str = None):
+def getNewTempFile(ext: str = None, getUid: bool = False):
     # uuid.uuid1() is also possible, but it contains some data of this device
-    filename = uuid.uuid4().hex
-    if ext:
-        filename = f"{filename}.{ext}"
-    return getTempFilePath(filename)
+    uid = uuid.uuid4().hex
+    filename = f"{uid}.{ext}" if ext else uid
+    filepath = getTempFilePath(filename)
+    if getUid:
+        return filepath, uid
+    else:
+        return filepath
 
 
 def fix4filename(filename: str) -> str:
