@@ -10,6 +10,7 @@ from fastapi import Path
 from pytube import YouTube
 from main import api
 from . import utility
+from ..search.models import SearchResponseItem
 
 
 class MetadataResponse(pydantic.BaseModel):
@@ -32,7 +33,7 @@ class MetadataResponse(pydantic.BaseModel):
     response_model=MetadataResponse,
     name="Get Video Metadata"
 )
-def getDownload(
+def metadata(
         youtubeId: str = Path()
 ):
     url = utility.completeYoutubeUrl(known=youtubeId)
@@ -51,3 +52,15 @@ def getDownload(
         keywords=video.keywords,
         metadata=video.metadata
     )
+
+
+@api.get(
+    '/metadata2/{youtubeId}',
+    response_model=SearchResponseItem,
+    name="Get Video Metadata"
+)
+def metadata2(
+        youtubeId: str = Path()
+):
+    from youtubesearchpython import Video
+    return Video.get(youtubeId)
