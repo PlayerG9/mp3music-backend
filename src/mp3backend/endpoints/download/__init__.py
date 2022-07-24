@@ -34,15 +34,14 @@ DELETE_DELAY = 15*60  # 15 min
 )
 def getMp3File(
         uid: str,
-        config: models.FileDownloadConfig
+        filename: str
 ):
-    filename = config.filename
     if not filename.endswith('mp3'):
         filename = f"{filename}.mp3"
 
     return FileResponse(
         path=utility.getTempFilePath(f"{uid}.mp3"),
-        filename=filename
+        filename=utility.fix4filename(filename)
     )
 
 
