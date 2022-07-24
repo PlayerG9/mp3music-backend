@@ -40,6 +40,9 @@ def _findValueX():
     response.raise_for_status()
     javascript = response.text
     match = re.search(r'\("value", "(.{15,})"\)', javascript)
+    if not match:
+        print(javascript)
+        raise LyricsNotFound("failed to retrieve x-key")
     return match.group(1)
 
 
