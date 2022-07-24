@@ -212,6 +212,11 @@ async def manipulateMp3Metadata(state: SharedState):
         await state.websocket.send_json(dict(
             warning=f"failed to fetch thumbnail ({error.__class__.__name__}: {error})"
         ))
+    except Exception as error:
+        await state.websocket.send_json(dict(
+            error=error,
+            error_class=error.__class__.__name__
+        ))
     else:
         # for keyId in [ImageFrame.ICON, ImageFrame.FRONT_COVER]:
         tag.images.set(
@@ -228,6 +233,11 @@ async def manipulateMp3Metadata(state: SharedState):
     except (aiohttp.ServerTimeoutError, aiohttp.ClientError, LyricsNotFound) as error:
         await state.websocket.send_json(dict(
             warning=f"failed to fetch lyrics ({error.__class__.__name__}: {error})"
+        ))
+    except Exception as error:
+        await state.websocket.send_json(dict(
+            error=error,
+            error_class=error.__class__.__name__
         ))
     else:
         tag.lyrics.set(lyrics)
