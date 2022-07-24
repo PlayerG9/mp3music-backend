@@ -7,6 +7,7 @@ import os
 import asyncio
 
 import fastapi
+from fastapi import status
 from fastapi.responses import FileResponse
 import pytube
 import moviepy.editor as moviepy
@@ -39,8 +40,12 @@ def getMp3File(
     if not filename.endswith('mp3'):
         filename = f"{filename}.mp3"
 
+    filepath = utility.getTempFilePath(f"{uid}.mp3")
+    if not os.path.isfile(filepath):
+        raise fastapi.HTTPException(status.HTTP_404_NOT_FOUND, "invalid file uid")
+
     return FileResponse(
-        path=utility.getTempFilePath(f"{uid}.mp3"),
+        path=filepath,
         filename=utility.fix4filename(filename)
     )
 
