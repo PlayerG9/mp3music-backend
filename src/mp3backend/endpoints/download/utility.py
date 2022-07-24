@@ -36,7 +36,7 @@ def getNewTempFile(ext: str = None, getUid: bool = False):
 
 
 def fix4filename(filename: str) -> str:
-    filename = re.sub(r'[^\w\-.()]', '_', filename).strip()
+    filename = re.sub(r'[^\w\-.() ]', '_', filename).strip('_')
     while '__' in filename:
         filename = filename.replace('__', '_')
     return filename
