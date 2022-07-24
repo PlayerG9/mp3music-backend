@@ -123,8 +123,7 @@ async def download(
             error=str(error),
             error_class=error.__class__.__name__
         ))
-        # 1011 == "Internal Error"
-        await websocket.close(code=1011, reason=str(error))
+        await websocket.close(code=status.WS_1011_INTERNAL_ERROR, reason=str(error))
         import traceback
         traceback.print_exception(type(error), error, error.__traceback__)
 
