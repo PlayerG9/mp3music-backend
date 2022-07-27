@@ -5,7 +5,11 @@
   "warning": "message",
   "error": "description",
   "error_class": "class",
-  "json": {
+  "extra": {
+    "has": 0,
+    "max": 0
+  },
+  "final": {
     "uid": "hex",
     "filename": "string"
   }
@@ -19,7 +23,12 @@
   - error description
 - error_class
   - always together with error
-- json
+- extra
+  - has
+    - has downloaded
+  - max
+    - to download
+- final
   - uid
     - uid for the `/api/mp3file/{uid}` endpoint
   - filename
