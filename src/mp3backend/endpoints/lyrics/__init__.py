@@ -4,7 +4,7 @@ r"""
 
 """
 import fastapi
-from fastapi import status
+from fastapi import status, Query
 from main import api
 from . import models
 from . import crud
@@ -16,8 +16,8 @@ from . import crud
     name="Fetch Lyrics"
 )
 def findLyrics(
-        title: str = fastapi.Body(),
-        author: str = fastapi.Body(None),
+        title: str = Query(),
+        author: str = Query(None),
 ):
     try:
         lyrics = crud.findLyrics(title=title, creator=author)

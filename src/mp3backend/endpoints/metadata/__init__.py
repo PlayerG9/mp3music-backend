@@ -3,7 +3,7 @@
 r"""
 
 """
-from fastapi import Body
+from fastapi import Query
 from pytube import YouTube
 from main import api
 from . import utility
@@ -16,9 +16,9 @@ from . import models
     name="Get Video Metadata"
 )
 def metadata(
-        config: models.MetadataRequestBody
+        youtubeId: str = Query()
 ):
-    url = utility.completeYoutubeUrl(known=config.youtubeId)
+    url = utility.completeYoutubeUrl(known=youtubeId)
     video = YouTube(url)
     return dict(
         video_id=video.video_id,
@@ -42,7 +42,7 @@ def metadata(
     name="Get Video Metadata"
 )
 def metadata2(
-        config: models.MetadataRequestBody
+        youtubeId: str = Query()
 ):
     from youtubesearchpython import Video
-    return Video.get(config.youtubeId, timeout=20)
+    return Video.get(youtubeId, timeout=20)
