@@ -3,40 +3,22 @@
 r"""
 
 """
-from datetime import datetime
-from typing import List, Optional
-import pydantic
-from fastapi import Path
+from fastapi import Body
 from pytube import YouTube
 from main import api
 from . import utility
-from ..search.models import SearchResponseItem
-
-
-class MetadataResponse(pydantic.BaseModel):
-    video_id: str
-    title: str
-    author: str
-    description: str
-    channel_id: str
-    thumbnail_url: str
-    publish_date: Optional[datetime]
-    rating: Optional[float]
-    length: Optional[int]
-    views: Optional[int]
-    keywords: List[str]
-    metadata: Optional[dict]
+from . import models
 
 
 @api.get(
-    '/metadata/{youtubeId}',
-    response_model=MetadataResponse,
+    '/metadata/v1',
+    response_model=models.MetadataResponse,
     name="Get Video Metadata"
 )
 def metadata(
-        youtubeId: str = Path()
+        config: models.MetadataRequestBody
 ):
-    url = utility.completeYoutubeUrl(known=youtubeId)
+    url = utility.completeYoutubeUrl(known=config.youtubeId)
     video = YouTube(url)
     return dict(
         video_id=video.video_id,
@@ -55,12 +37,12 @@ def metadata(
 
 
 @api.get(
-    '/metadata2/{youtubeId}',
-    response_model=SearchResponseItem,
+    '/metadata/v2',
+    response_model=models.SearchResponseItem,
     name="Get Video Metadata"
 )
 def metadata2(
-        youtubeId: str = Path()
+        config: models.MetadataRequestBody
 ):
     from youtubesearchpython import Video
-    return Video.get(youtubeId)
+    return Video.get(config.youtubeId, timeout=20)

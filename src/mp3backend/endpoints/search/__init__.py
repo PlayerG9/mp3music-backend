@@ -3,19 +3,19 @@
 r"""
 
 """
-from fastapi import Path, Query
+from fastapi import Body
 from main import api
 from . import models
 
 
 @api.get(
-    path='/search/{query:path}',
+    path='/search',
     response_model=models.SearchResponse,
     name="Search for Videos"
 )
 def search(
-        query: str = Path(),
-        limit: int = Query(15, gt=0, le=50)
+        query: str = Body(),
+        limit: int = Body(15, gt=0, le=50)
 ):
     from youtubesearchpython import CustomSearch, SearchMode, VideoDurationFilter, VideoSortOrder
     web_search = CustomSearch(
