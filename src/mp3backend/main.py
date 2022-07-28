@@ -7,6 +7,7 @@ import os
 import importlib
 
 import fastapi
+from fastapi.responses import RedirectResponse
 
 import scripts
 
@@ -30,7 +31,12 @@ app = fastapi.FastAPI(
 
 @app.get('/', include_in_schema=False)
 def index():
-    return fastapi.responses.RedirectResponse('/redoc')
+    return RedirectResponse(app.redoc_url)
+
+
+@app.get('/mp3music/{path:path}', include_in_schema=False)
+def interface(path: str):
+    return RedirectResponse(f"https://playerg9.github.io/mp3music/{path}")
 
 
 api = fastapi.APIRouter(prefix="/api")
