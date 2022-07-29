@@ -135,8 +135,8 @@ async def delayedFileDelete(filepath: str):
 def getFinalFilename(metadata: models.MetadataConfig) -> str:
     title = utility.fix4filename(metadata.title or "audio")
     if metadata.artist:
-        author = utility.fix4filename(metadata.artist)
-        return f"{author}_{title}"
+        artist = utility.fix4filename(metadata.artist)
+        return f"{artist}_{title}"
     else:
         return f"{title}"
 

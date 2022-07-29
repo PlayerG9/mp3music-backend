@@ -46,15 +46,15 @@ def _findValueX():
     return match.group(1)
 
 
-def _searchForLyricsUrl(title: str, creator: str) -> str:
+def _searchForLyricsUrl(title: str, artist: str) -> str:
     from urllib.parse import quote_plus
 
     x_value = _findValueX()
 
     site = "https://search.azlyrics.com/"
 
-    if creator:
-        query = f"{creator} {title}"
+    if artist:
+        query = f"{artist} {title}"
     else:
         query = title
     url = f"{site}?w=songs&p=1&q={quote_plus(query)}&x={x_value}"

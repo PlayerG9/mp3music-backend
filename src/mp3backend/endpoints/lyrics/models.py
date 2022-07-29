@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 class RequestConfig(BaseModel):
     title: str
-    author: Optional[str]
+    artist: Optional[str]
 
 
 class LyricsResponse(BaseModel):

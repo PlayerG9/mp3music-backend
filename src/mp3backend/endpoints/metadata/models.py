@@ -17,7 +17,7 @@ class MetadataRequestBody(BaseModel):
 class MetadataResponse(BaseModel):
     video_id: str
     title: str
-    author: str
+    artist: str
     description: str
     channel_id: str
     thumbnail_url: str

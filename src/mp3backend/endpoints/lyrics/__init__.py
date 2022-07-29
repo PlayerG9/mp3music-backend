@@ -17,10 +17,10 @@ from . import crud
 )
 def findLyrics(
         title: str = Query(),
-        author: str = Query(None),
+        artist: str = Query(None),
 ):
     try:
-        lyrics = crud.findLyrics(title=title, creator=author)
+        lyrics = crud.findLyrics(title=title, creator=artist)
     except crud.LyricsNotFound as error:
         print(error)
         raise fastapi.exceptions.HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))

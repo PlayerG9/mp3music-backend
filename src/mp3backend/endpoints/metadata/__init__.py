@@ -23,7 +23,7 @@ def metadata(
     return dict(
         video_id=video.video_id,
         title=video.title,
-        author=video.author,
+        artist=video.author,
         description=video.description,
         channel_id=video.channel_id,
         thumbnail_url=video.thumbnail_url,
