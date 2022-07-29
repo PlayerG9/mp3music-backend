@@ -164,10 +164,10 @@ async def download_thumbnail(state) -> (bytes, str):
 
 async def downloadMp4Video(state: SharedState):
     youtube = state.youtube = pytube.YouTube(state.youtubeLink)
-    await state.websocket.send_json(dict(message="searching for download"))
+    await state.websocket.send_json(dict(info="searching for download"))
     audio_stream = youtube.streams.get_audio_only()
 
-    await state.websocket.send_json(dict(message="start download"))
+    await state.websocket.send_json(dict(info="start download"))
     async with aiohttp.ClientSession() as session:
         timeout = aiohttp.ClientTimeout(total=300, connect=20)
         async with session.get(audio_stream.url, timeout=timeout) as response:
@@ -182,7 +182,7 @@ async def downloadMp4Video(state: SharedState):
                     downloaded += len(chunk)
                     file.write(chunk)
                     await state.websocket.send_json(dict(
-                        message=f"progress: {int((downloaded / max_size) * 100)}%",
+                        info=f"progress: {int((downloaded / max_size) * 100)}%",
                         extra=dict(
                             has=downloaded,
                             max=max_size
