@@ -34,7 +34,7 @@ DELETE_DELAY = 15*60  # 15 min
 )
 def getMp3File(
         uid: str,
-        filename: str = Query()
+        filename: str = Query("audio")
 ):
     if not filename.endswith('mp3'):
         filename = f"{filename}.mp3"
