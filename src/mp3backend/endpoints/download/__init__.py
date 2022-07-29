@@ -23,7 +23,6 @@ from . import models
 from . import utility
 
 
-WEBSOCKET_CONNECTED = 1  # fastapi.websockets.WebsocketState.CONNECTED
 CHUNK_SIZE = 1024*1024
 DELETE_DELAY = 15*60  # 15 min
 
