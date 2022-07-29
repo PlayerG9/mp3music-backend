@@ -7,7 +7,7 @@ import os
 import asyncio
 
 import fastapi
-from fastapi import status
+from fastapi import status, Query
 from fastapi.responses import FileResponse
 import pytube
 import moviepy.editor as moviepy
@@ -34,7 +34,7 @@ DELETE_DELAY = 15*60  # 15 min
 )
 def getMp3File(
         uid: str,
-        filename: str
+        filename: str = Query()
 ):
     if not filename.endswith('mp3'):
         filename = f"{filename}.mp3"
@@ -133,9 +133,12 @@ async def delayedFileDelete(filepath: str):
 
 
 def getFinalFilename(metadata: models.MetadataConfig) -> str:
-    author = utility.fix4filename(metadata.artist)
-    title = utility.fix4filename(metadata.title)
-    return f"{author}_{title}"
+    title = utility.fix4filename(metadata.title or "audio")
+    if metadata.artist:
+        author = utility.fix4filename(metadata.artist)
+        return f"{author}_{title}"
+    else:
+        return f"{title}"
 
 
 def getMimetypeFromUrl(url: str) -> str:
