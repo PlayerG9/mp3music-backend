@@ -1,4 +1,15 @@
 # websocket communication protocol
+
+```json
+{
+  "youtubeId": "string",
+  "metadata": {
+    "title": "string",
+    "author": "string"
+  }
+}
+```
+
 ```json
 {
   "info": "message",

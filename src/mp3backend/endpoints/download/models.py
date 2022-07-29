@@ -17,5 +17,5 @@ class MetadataConfig(BaseModel):
 
 
 class DownloadConfig(BaseModel):
-    metadata: MetadataConfig
     youtubeId: str
+    metadata: MetadataConfig
