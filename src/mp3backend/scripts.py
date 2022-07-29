@@ -24,9 +24,7 @@ def getApiDescription() -> str:
 
 
 def getAllowedOrigins() -> List[str]:
-    github = "mp3music.github.com"
     return [
-        f"http://{github}",
-        f"https://{github}",
+        f"https://playerg9.github.io",
         f"http://localhost:3000"
     ]
