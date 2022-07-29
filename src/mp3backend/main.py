@@ -8,6 +8,7 @@ import importlib
 
 import fastapi
 from fastapi.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 import scripts
 
@@ -26,6 +27,13 @@ app = fastapi.FastAPI(
     title="mp3music",
     description=scripts.getApiDescription(),
     version=__version__
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=scripts.getAllowedOrigins(),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
