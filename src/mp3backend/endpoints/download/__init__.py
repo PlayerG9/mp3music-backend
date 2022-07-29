@@ -60,11 +60,10 @@ class SharedState:
 
 
 @api.websocket(
-    '/download/{youtubeId}',
+    '/download',
     name="create the mp3 file (websocket for status)"
 )
 async def download(
-        youtubeId: str,
         websocket: fastapi.WebSocket,
         backgroundTasks: fastapi.BackgroundTasks
 ):
@@ -83,7 +82,7 @@ async def download(
     state = SharedState()
     state.mp4FilePath = utility.getNewTempFile('mp4')
     state.mp3FilePath, mp3Uid = utility.getNewTempFile('mp3', getUid=True)
-    state.youtubeLink = completeYoutubeUrl(youtubeId)
+    state.youtubeLink = completeYoutubeUrl(config.youtubeId)
     state.websocket = websocket
     state.config = config
 
