@@ -76,6 +76,7 @@ async def download(
             error=str(error),
             error_class=error.__class__.__name__
         ))
+        await websocket.close(code=status.WS_1003_UNSUPPORTED_DATA, reason=str(error))
         return
 
     state = SharedState()
