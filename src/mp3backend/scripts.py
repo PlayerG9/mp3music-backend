@@ -28,5 +28,5 @@ def getAllowedOrigins() -> List[str]:
     return [
         f"http://{github}",
         f"https://{github}",
-        f"http://localhost:5000"
+        f"http://localhost:3000"
     ]
