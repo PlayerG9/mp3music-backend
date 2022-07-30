@@ -6,6 +6,7 @@ r"""
 import os
 from typing import List
 from datetime import datetime
+from main import __version__
 
 
 def getPath(*paths):
@@ -19,7 +20,8 @@ def getApiDescription() -> str:
     with open(getPath('README.md')) as readme:
         markdown = readme.read()
     return markdown.format(
-        build_time=datetime.now().isoformat(sep=" ")
+        build_time=datetime.now().isoformat(sep=" ", timespec="seconds"),
+        version=__version__
     )
 
 

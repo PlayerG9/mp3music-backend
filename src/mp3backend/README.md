@@ -1,3 +1,5 @@
 # API Description
 
-start-time: `{build_time}`
+| Start-Time | `{build_time}` |
+|------------|----------------|
+| Version    | `{version}`    |
