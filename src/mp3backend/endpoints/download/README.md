@@ -16,7 +16,7 @@
   "warning": "message",
   "error": "description",
   "error_class": "class",
-  "extra": {
+  "progress": {
     "has": 0,
     "max": 0
   },
@@ -34,7 +34,7 @@
   - error description
 - error_class
   - always together with error
-- extra
+- progress
   - has
     - has downloaded
   - max

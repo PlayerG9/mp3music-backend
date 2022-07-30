@@ -186,7 +186,7 @@ async def downloadMp4Video(state: SharedState):
                     file.write(chunk)
                     await state.websocket.send_json(dict(
                         info=f"progress: {int((downloaded / max_size) * 100)}%",
-                        extra=dict(
+                        progress=dict(
                             has=downloaded,
                             max=max_size
                         )
