@@ -26,6 +26,6 @@ def getApiDescription() -> str:
 def getAllowedOrigins() -> List[str]:
     return [
         f"https://playerg9.github.io",
-        f"https://localhost:3000"
+        f"https://localhost:3000",
         f"http://localhost:3000"
     ]
