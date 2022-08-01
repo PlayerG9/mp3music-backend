@@ -15,8 +15,9 @@ class LyricsNotFound(LookupError):
 
 
 async def findLyrics(title: str, artist: Optional[str] = None) -> str:
+    timeout = ClientTimeout(30)
     try:
-        async with ClientSession(timeout=30) as session:
+        async with ClientSession(timeout=timeout) as session:
             title, artist = await _makeSearch(session, title, artist)
             return await _fetchLyrics(session, title, artist)
     except asyncio.TimeoutError:
