@@ -33,8 +33,10 @@ async def _makeSearch(session: ClientSession, title: str, artist: str) -> (str, 
         results: list = data['data']
         best = results[0]
         return best['title'], best['artist']['name']
-    except (KeyError, IndexError):
+    except KeyError:
         raise LyricsNotFound("search failed")
+    except IndexError:
+        raise LyricsNotFound("no results")
 
 
 async def _fetchLyrics(session: ClientSession, title: str, artist: str) -> str:

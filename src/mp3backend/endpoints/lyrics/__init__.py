@@ -15,7 +15,7 @@ from . import crud
     response_model=models.LyricsResponse,
     name="Fetch Lyrics"
 )
-def findLyrics(
+async def findLyrics(
         title: str = Query(),
         artist: str = Query(None),
 ):
