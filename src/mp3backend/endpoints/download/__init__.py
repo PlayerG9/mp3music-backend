@@ -120,7 +120,7 @@ async def download(
             os.remove(state.mp3FilePath)
         await websocket.send_json(dict(
             error=str(error),
-            error_class=error.__class__.__name__
+            error_class=str(error.__class__.__name__)
         ))
         await websocket.close(code=status.WS_1011_INTERNAL_ERROR, reason=str(error))
         import traceback
