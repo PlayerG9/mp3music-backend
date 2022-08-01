@@ -20,9 +20,8 @@ def findLyrics(
         artist: str = Query(None),
 ):
     try:
-        lyrics = crud.findLyrics(title=title, creator=artist)
+        lyrics = await crud.findLyrics(title=title, artist=artist)
     except crud.LyricsNotFound as error:
-        print(error)
         raise fastapi.exceptions.HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
     return dict(
         lyrics=lyrics

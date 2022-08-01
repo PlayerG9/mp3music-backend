@@ -239,7 +239,7 @@ async def manipulateMp3Metadata(state: SharedState):
         info="Searching for lyrics..."
     ))
     try:
-        lyrics: str = findLyrics(metadata.title, metadata.artist)
+        lyrics: str = await findLyrics(title=metadata.title, artist=metadata.artist)
     except (aiohttp.ServerTimeoutError, aiohttp.ClientError, LyricsNotFound) as error:
         await state.websocket.send_json(dict(
             warning=f"failed to fetch lyrics ({error.__class__.__name__}: {error})"
