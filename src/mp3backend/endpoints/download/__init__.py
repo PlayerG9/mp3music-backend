@@ -170,7 +170,7 @@ async def downloadMp4Video(state: SharedState):
     audio_stream = youtube.streams.get_audio_only()
 
     await state.websocket.send_json(dict(
-        info="start download"
+        info="downloading..."
     ))
     async with aiohttp.ClientSession() as session:
         timeout = aiohttp.ClientTimeout(total=300, connect=20)
