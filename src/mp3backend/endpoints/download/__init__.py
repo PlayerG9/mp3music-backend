@@ -134,12 +134,12 @@ async def delayedFileDelete(filepath: str):
 
 
 def getRecommendedFilename(metadata: models.MetadataConfig) -> str:
-    title = utility.fix4filename(metadata.title or "audio")
+    title = metadata.title or "audio"
     if metadata.artist:
-        artist = utility.fix4filename(metadata.artist)
-        return f"{artist}_{title}"
+        artist = metadata.artist
+        return utility.fix4filename(f"{artist}-{title}")
     else:
-        return f"{title}"
+        return utility.fix4filename(f"{title}")
 
 
 def getMimetypeFromUrl(url: str) -> str:
