@@ -7,8 +7,6 @@ from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
 
-from ..search.models import SearchResponseItem  # noqa | for export
-
 
 class MetadataResponse(BaseModel):
     video_id: str
