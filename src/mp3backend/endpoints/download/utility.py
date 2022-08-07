@@ -7,6 +7,7 @@ import os
 import tempfile
 import uuid
 import re
+import unicodedata
 
 
 TEMPDIR = os.path.join(
@@ -36,10 +37,10 @@ def getNewTempFile(ext: str = None, getUid: bool = False):
 
 
 def fix4filename(filename: str) -> str:
-    filename = re.sub(r'[^\w\-.() ]', '_', filename).strip('_')
-    while '__' in filename:
-        filename = filename.replace('__', '_')
-    return filename
+    filename = str(filename)
+    unicodedata.normalize("NFKD", filename).encode('ascii', 'ignore').decode('ascii')
+    filename = re.sub(r"[^\w\s-]", "", filename)
+    return re.sub(r"[-\s]+", "-", filename).strip('-_')
 
 
 def removeBrackets(string: str) -> str:
