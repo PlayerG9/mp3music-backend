@@ -107,7 +107,7 @@ async def download(
         await websocket.send_json(dict(
             final={
                 "uid": mp3Uid,
-                "filename": getFinalFilename(config.metadata)
+                "filename": getRecommendedFilename(config.metadata)
             }
         ))
         backgroundTasks.add_task(
@@ -133,7 +133,7 @@ async def delayedFileDelete(filepath: str):
     os.remove(filepath)
 
 
-def getFinalFilename(metadata: models.MetadataConfig) -> str:
+def getRecommendedFilename(metadata: models.MetadataConfig) -> str:
     title = utility.fix4filename(metadata.title or "audio")
     if metadata.artist:
         artist = utility.fix4filename(metadata.artist)
