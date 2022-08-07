@@ -7,9 +7,10 @@ import os
 import asyncio
 
 import fastapi
-from fastapi import status, Query
+from fastapi import status, Query, HTTPException
 from fastapi.responses import FileResponse
 import pytube
+from pytube.exceptions import VideoUnavailable
 import moviepy.editor as moviepy
 import aiohttp
 import requests
@@ -41,7 +42,7 @@ def getMp3File(
 
     filepath = utility.getTempFilePath(f"{uid}.mp3")
     if not os.path.isfile(filepath):
-        raise fastapi.HTTPException(status.HTTP_404_NOT_FOUND, "invalid file uid")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "invalid file uid")
 
     return FileResponse(
         path=filepath,
@@ -163,7 +164,10 @@ async def download_thumbnail(state) -> (bytes, str):
 
 
 async def downloadMp4Video(state: SharedState):
-    youtube = state.youtube = pytube.YouTube(state.youtubeLink)
+    try:
+        youtube = state.youtube = pytube.YouTube(state.youtubeLink)
+    except VideoUnavailable:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "invalid youtube video")
     await state.websocket.send_json(dict(
         info="searching for download"
     ))
