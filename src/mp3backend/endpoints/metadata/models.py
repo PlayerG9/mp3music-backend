@@ -10,10 +10,6 @@ from pydantic import BaseModel
 from ..search.models import SearchResponseItem  # noqa | for export
 
 
-class MetadataRequestBody(BaseModel):
-    youtubeId: str
-
-
 class MetadataResponse(BaseModel):
     video_id: str
     title: str
@@ -26,4 +22,3 @@ class MetadataResponse(BaseModel):
     length: Optional[int]
     views: Optional[int]
     keywords: List[str]
-    metadata: Optional[dict]

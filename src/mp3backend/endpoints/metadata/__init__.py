@@ -12,7 +12,7 @@ from . import models
 
 
 @api.get(
-    '/metadata/v1',
+    '/metadata',
     response_model=models.MetadataResponse,
     name="Get Video Metadata"
 )
@@ -39,20 +39,4 @@ def metadata(
         length=video.rating,
         views=video.views,
         keywords=video.keywords,
-        metadata=video.metadata
     )
-
-
-@api.get(
-    '/metadata/v2',
-    response_model=models.SearchResponseItem,
-    name="Get Video Metadata"
-)
-def metadata2(
-        youtubeId: str = Query()
-):
-    from youtubesearchpython import Video
-    try:
-        return Video.get(youtubeId, timeout=20)
-    except TypeError:  # attempts to add something that can return None to a string
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "video not found")
