@@ -3,7 +3,7 @@
 r"""
 
 """
-import fastapi
+from fastapi import HTTPException
 from fastapi import status, Query
 from main import api
 from . import models
@@ -21,8 +21,27 @@ async def findLyrics(
 ):
     try:
         lyrics = await crud.findLyrics(title=title, artist=artist)
-    except crud.LyricsNotFound as error:
-        raise fastapi.exceptions.HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
+    except (crud.LyricsNotFound, crud.TitleAndLyricsNotFound) as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
     return dict(
         lyrics=lyrics
+    )
+
+
+@api.get(
+    '/find',
+    response_model=models.TitleAndArtistResponse,
+    name="Find Title and Artist"
+)
+async def findTitleAndArtist(
+        title: str = Query(),
+        artist: str = Query(None)
+):
+    try:
+        title, artist = await crud.findTitleAndArtist(title=title, artist=artist)
+    except crud.TitleAndLyricsNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
+    return dict(
+        title=title,
+        artist=artist
     )

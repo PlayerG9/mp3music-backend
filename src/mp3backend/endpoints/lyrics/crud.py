@@ -14,6 +14,10 @@ class LyricsNotFound(LookupError):
     pass
 
 
+class TitleAndLyricsNotFound(LookupError):
+    pass
+
+
 async def findLyrics(title: str, artist: Optional[str] = None) -> str:
     timeout = ClientTimeout(total=60)
     try:
@@ -22,6 +26,16 @@ async def findLyrics(title: str, artist: Optional[str] = None) -> str:
             return await _fetchLyrics(session, title, artist)
     except asyncio.TimeoutError:
         raise LyricsNotFound("search took to long")
+
+
+async def findTitleAndArtist(title: str, artist: Optional[str] = None) -> (str, str):
+    timeout = ClientTimeout(total=30)
+    try:
+        async with ClientSession(timeout=timeout) as session:
+            title, artist = await _makeSearch(session, title, artist)
+            return title, artist
+    except asyncio.TimeoutError:
+        raise TitleAndLyricsNotFound("search took to long")
 
 
 async def _makeSearch(session: ClientSession, title: str, artist: str) -> (str, str):
@@ -38,9 +52,9 @@ async def _makeSearch(session: ClientSession, title: str, artist: str) -> (str, 
         best = results[0]
         return best['title'], best['artist']['name']
     except KeyError:
-        raise LyricsNotFound("search failed")
+        raise TitleAndLyricsNotFound("search failed")
     except IndexError:
-        raise LyricsNotFound("no results")
+        raise TitleAndLyricsNotFound("no results")
 
 
 async def _fetchLyrics(session: ClientSession, title: str, artist: str) -> str:

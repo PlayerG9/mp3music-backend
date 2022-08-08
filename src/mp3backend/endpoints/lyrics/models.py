@@ -14,3 +14,8 @@ class RequestConfig(BaseModel):
 
 class LyricsResponse(BaseModel):
     lyrics: str = "text"
+
+
+class TitleAndArtistResponse(BaseModel):
+    title: str
+    artist: str
