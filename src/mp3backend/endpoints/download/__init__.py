@@ -89,15 +89,15 @@ async def download(
 
     try:
         await websocket.send_json(dict(
-            info="start download"
+            info="Start mp3-download"
         ))
         await downloadMp4Video(state=state)
         await websocket.send_json(dict(
-            info="converting to mp3"
+            info="Converting to mp3..."
         ))
         await convertToMp3Audio(state=state)
         await websocket.send_json(dict(
-            info="manipulating mp3 metadata"
+            info="Manipulating mp3 metadata..."
         ))
         os.remove(state.mp4FilePath)
         await manipulateMp3Metadata(state=state)
@@ -169,12 +169,12 @@ async def downloadMp4Video(state: SharedState):
     except VideoUnavailable:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "invalid youtube video")
     await state.websocket.send_json(dict(
-        info="searching for download"
+        info="Searching for download..."
     ))
     audio_stream = youtube.streams.get_audio_only()
 
     await state.websocket.send_json(dict(
-        info="downloading..."
+        info="Downloading..."
     ))
 
     @youtube.register_on_progress_callback
