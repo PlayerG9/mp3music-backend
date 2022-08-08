@@ -176,25 +176,43 @@ async def downloadMp4Video(state: SharedState):
     await state.websocket.send_json(dict(
         info="downloading..."
     ))
-    async with aiohttp.ClientSession() as session:
-        timeout = aiohttp.ClientTimeout(total=300, connect=20)
-        async with session.get(audio_stream.url, timeout=timeout) as response:
-            response.raise_for_status()
 
-            downloaded = 0
-            max_size = audio_stream.filesize
+    @youtube.register_on_progress_callback
+    def on_progress(_, __, bytes_remaining: int):
+        max_size = audio_stream.filesize
+        downloaded = max_size - bytes_remaining
+        asyncio.run(state.websocket.send_json(dict(
+            info=f"Progress: {int((downloaded / max_size) * 100)}%",
+            progress=dict(
+                has=downloaded,
+                max=max_size
+            )
+        )))
+        asyncio.run(asyncio.sleep(0))  # don't know if helpful
 
-            with open(state.mp4FilePath, 'wb') as file:
-                async for chunk in response.content.iter_chunked(CHUNK_SIZE):
-                    downloaded += len(chunk)
-                    file.write(chunk)
-                    await state.websocket.send_json(dict(
-                        info=f"progress: {int((downloaded / max_size) * 100)}%",
-                        progress=dict(
-                            has=downloaded,
-                            max=max_size
-                        )
-                    ))
+    with open(state.mp4FilePath, 'wb') as file:
+        audio_stream.stream_to_buffer(file)
+
+    # # I don't know why but async-streams are way to slow (eg. 109s vs 0.6s)
+    # async with aiohttp.ClientSession() as session:
+    #     timeout = aiohttp.ClientTimeout(total=300, connect=20)
+    #     async with session.get(audio_stream.url, timeout=timeout) as response:
+    #         response.raise_for_status()
+    #
+    #         downloaded = 0
+    #         max_size = audio_stream.filesize
+    #
+    #         with open(state.mp4FilePath, 'wb') as file:
+    #             async for chunk in response.content.iter_chunked(CHUNK_SIZE):
+    #                 downloaded += len(chunk)
+    #                 file.write(chunk)
+    #                 await state.websocket.send_json(dict(
+    #                     info=f"progress: {int((downloaded / max_size) * 100)}%",
+    #                     progress=dict(
+    #                         has=downloaded,
+    #                         max=max_size
+    #                     )
+    #                 ))
 
 
 async def convertToMp3Audio(state: SharedState):
