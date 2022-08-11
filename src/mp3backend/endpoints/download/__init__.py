@@ -105,10 +105,10 @@ async def download(
             info="mp3 file is ready to download"
         ))
         await websocket.send_json(dict(
-            final={
-                "uid": mp3Uid,
-                "filename": getRecommendedFilename(config.metadata)
-            }
+            final=dict(
+                uid=mp3Uid,
+                filename=getRecommendedFilename(config.metadata)
+            )
         ))
         backgroundTasks.add_task(
             delayedFileDelete,
