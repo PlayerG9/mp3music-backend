@@ -17,7 +17,7 @@ import os
 import importlib
 
 import fastapi
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 import scripts
@@ -40,6 +40,16 @@ app.add_middleware(
 @app.get('/', include_in_schema=False)
 def index():
     return RedirectResponse(app.redoc_url)
+
+
+@app.get('/favicon.ico', include_in_schema=False)
+def favicon():
+    return FileResponse(
+        os.path.join(
+            os.path.dirname(__file__),
+            'favicon.ico'
+        )
+    )
 
 
 @app.get('/mp3music/{path:path}', include_in_schema=False)
