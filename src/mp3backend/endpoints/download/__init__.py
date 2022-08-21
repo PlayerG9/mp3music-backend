@@ -18,7 +18,7 @@ import eyed3.mp3
 from eyed3.id3.frames import ImageFrame
 
 from main import api
-from ..lyrics.crud import findLyrics, LyricsNotFound
+from ..lyrics.crud import findLyrics, LyricsNotFound, TitleAndLyricsNotFound
 from ..metadata.utility import completeYoutubeUrl
 from . import models
 from . import utility
@@ -241,7 +241,7 @@ async def manipulateMp3Metadata(state: SharedState):
     ))
     try:
         lyrics: str = await findLyrics(title=metadata.title, artist=metadata.artist)
-    except (aiohttp.ServerTimeoutError, aiohttp.ClientError, LyricsNotFound) as error:
+    except (aiohttp.ServerTimeoutError, aiohttp.ClientError, LyricsNotFound, TitleAndLyricsNotFound) as error:
         await state.websocket.send_json(dict(
             warning=f"failed to fetch lyrics ({error.__class__.__name__}: {getattr(error, 'message', error)})"
         ))
