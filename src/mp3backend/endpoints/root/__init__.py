@@ -3,7 +3,6 @@
 r"""
 
 """
-# from fastapi import Query
 from pydantic import BaseModel
 from main import api
 
