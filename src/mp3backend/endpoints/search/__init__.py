@@ -27,4 +27,5 @@ def search(
         limit=limit,
         timeout=30
     )
-    return web_search.result()
+    data = web_search.result()
+    return list(filter(lambda e: e.get('type') == 'video', data['result']))
