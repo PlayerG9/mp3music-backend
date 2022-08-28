@@ -37,7 +37,8 @@ def getMp3File(
         uid: str,
         filename: str = Query("audio")
 ):
-    if not filename.endswith('mp3'):
+    filename = utility.fix4filename(os.path.splitext(filename)[0])
+    if not filename.endswith('.mp3'):
         filename = f"{filename}.mp3"
 
     filepath = utility.getTempFilePath(f"{uid}.mp3")
@@ -46,7 +47,7 @@ def getMp3File(
 
     return FileResponse(
         path=filepath,
-        filename=utility.fix4filename(filename)
+        filename=filename
     )
 
 
